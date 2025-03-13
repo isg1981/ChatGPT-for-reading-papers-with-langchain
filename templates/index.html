@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chat</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        #chat-box {
+            width: 60%;
+            height: 300px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            overflow-y: scroll;
+            margin-bottom: 10px;
+        }
+        input, button {
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>AI Chat</h1>
+    <div id="chat-box"></div>
+    <input type="text" id="user-input" placeholder="Write your question...">
+    <button onclick="sendMessage()">Send</button>
+
+    <!-- PDF File Upload Form -->
+    <form id="upload-form">
+        <input type="file" id="pdfs" name="pdfs" accept=".pdf" multiple>
+        <button type="button" onclick="uploadPDFs()">Upload PDF</button>
+    </form>
+
+    <script>
+        async function sendMessage() {
+            let userInput = document.getElementById("user-input").value;
+            if (!userInput) return;
+
+            let chatBox = document.getElementById("chat-box");
+            chatBox.innerHTML += `<p><strong>You:</strong> ${userInput}</p>`;
+            document.getElementById("user-input").value = "";
+
+            let response = await fetch("http://127.0.0.1:5000/ask", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ question: userInput })
+            });
+            
+            let data = await response.json();
+            chatBox.innerHTML += `<p><strong>AI:</strong> ${data.answer}</p>`;
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        async function uploadPDFs() {
+            let form = document.getElementById("upload-form");
+            let formData = new FormData(form);
+
+            let response = await fetch("http://127.0.0.1:5000/data", {
+                method: "POST",
+                body: formData
+            });
+
+            let result = await response.text();
+            alert(result);  // Show the results
+        }
+    </script>
+</body>
+</html>
